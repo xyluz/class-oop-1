@@ -1,6 +1,10 @@
-<?php
+<?php namespace App\SharedClasses;
 
-use Enums\Rules;
+use App\SharedClasses\Enums\Rules;
+use App\SharedClasses\Objects\RulesObject;
+use App\SharedClasses\Objects\UserRequestObject;
+use Exception;
+
 
 class Validator
 {
@@ -11,7 +15,7 @@ class Validator
     //TODO: create class for handling errors
 
     private array $errors = [];
-    public function __construct(public Rules $rules, public array $inputObject)
+    public function __construct(public RulesObject $rules, public UserRequestObject $inputObject)
     {
         //TODO: implement data cleanup
     }
@@ -21,12 +25,14 @@ class Validator
      */
     public function validateCustom(): array {
 
-        foreach ($this->rules as $column => $rule) {
-            if (!isset($this->inputObject[$column])) {
+        //TODO: Fix the rules to array and use the correct rule format
+
+        foreach ($this->rules->toArray() as $column => $rule) {
+            if (!isset($this->inputObject->{$column})) {
                 continue;
             }
 
-            $isError = $this->applySingleInputValidation($rule, $this->inputObject[$column]);
+            $isError = $this->applySingleInputValidation($rule, $this->inputObject->{$column});
 
             $this->errors[$column] = count($isError) > 0 ? $isError : null;
 
@@ -65,7 +71,7 @@ class Validator
             $value = $single[1];
 
             if (! $law instanceof Rules) {
-                throw new Exception($rule . 'is invalid' . ' Only allowed rules are: ' . Rules::implodeCases());
+                throw new Exception($rule . 'is invalid' . ' Only allowed rules are: ' . Rules::toString());
             }
 
             $check = match($law) {

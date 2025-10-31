@@ -1,8 +1,10 @@
 <?php
 
-namespace Enums;
+namespace App\SharedClasses\Enums;
 
-use Traits\CallStaticTrait;
+use App\SharedClasses\Traits\CallStaticTrait;
+use App\SharedClasses\Traits\SharedEnumMethods;
+
 
 
 /**
@@ -14,15 +16,11 @@ use Traits\CallStaticTrait;
 enum Rules: string
 {
     use CallStaticTrait;
+    use SharedEnumMethods;
 
     case MIN = 'min';
     case MAX = 'max';
     case MUST = 'must';
     case NOT = 'not';
-
-    public static function implodeCases(): string
-    {
-        return  implode(', ', self::cases());
-    }
 
 }

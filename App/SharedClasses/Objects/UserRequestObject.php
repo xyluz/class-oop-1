@@ -1,6 +1,6 @@
 <?php
 
-namespace Objects;
+namespace App\SharedClasses\Objects;
 
 class UserRequestObject
 {
@@ -16,6 +16,12 @@ class UserRequestObject
     {
     }
 
+    /**
+     * TODO: address issues with testing static methods - this is a placeholder method.
+     *
+     * @param array $array
+     * @return static
+     */
     public static function fromArray(array $array):static
     {
         return new self(...$array);
@@ -24,4 +30,6 @@ class UserRequestObject
     public static function empty():bool{
         return false; //TODO: implement this or call it count
     }
+
+
 }

@@ -1,0 +1,20 @@
+{
+    "name": "xyluz/oop-al",
+    "description": "Practice OOP project",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "App/"
+        },
+        "files": [
+            "helpers/functions.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Seyi Onifade",
+            "email": "xyluz@ymail.com"
+        }
+    ],
+    "require": {}
+}

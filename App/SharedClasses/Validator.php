@@ -1,5 +1,6 @@
 <?php namespace App\SharedClasses;
 
+use App\SharedClasses\Enums\Constraints;
 use App\SharedClasses\Enums\Rules;
 use App\SharedClasses\Objects\RulesObject;
 use App\SharedClasses\Objects\UserRequestObject;
@@ -8,8 +9,6 @@ use Exception;
 
 class Validator
 {
-    private const array ALLOWED_CONSTRAINTS = ['alpha', 'numeric', 'alpha_numeric', 'array', 'uppercase', 'lowercase', 'symbol', 'upper_lower_sym' ]; //TODO: use Enum
-
     //TODO: Make class for input Object
     //TODO: make class for rules (in addition to Enum)
     //TODO: create class for handling errors
@@ -39,15 +38,6 @@ class Validator
         }
 
         return array_filter($this->errors);
-    }
-
-
-    /**
-     * @return string
-     */
-    private function getImplodeConstraints(): string
-    {
-        return implode(', ', self::ALLOWED_CONSTRAINTS);
     }
 
     private function makeArrayFromString(string $separator, string $string):array{
@@ -99,39 +89,22 @@ class Validator
         return is_int($input) ?  $input >= $value : strlen($input) >= $value;
     }
 
-    private function applyMustConstraint(mixed $input, string $constraint): bool
+    private function applyMustConstraint(mixed $input, Constraints $constraint): bool
     {
-        if (! in_array($constraint, ALLOWED_CONSTRAINTS)) {
-            throw new Exception("{$constraint} is invalid constraint type. Only allowed constraints are: ". $this->getImplodeConstraints());
-        }
         return match($constraint) {
-            'alpha' => ctype_alpha($input),
-            'numeric' => ctype_digit($input),
-            'alpha_numeric' => ctype_alnum($input),
-            'array' => is_array($input),
-            'upper_lower_sym' => checkPasswordStrength($input),
-            'lowercase' => ctype_lower($input),
-            'symbol' => ctype_space($input),
+            Constraints::ALPHA => ctype_alpha($input),
+            Constraints::NUMERIC => ctype_digit($input),
+            Constraints::ALPHA_NUMERIC => ctype_alnum($input),
+            Constraints::ARRAY => is_array($input),
+            Constraints::LOWERCASE => ctype_lower($input),
+            Constraints::SYMBOL => ctype_space($input),
             default => false,
         };
     }
 
-    private function applyNotConstraint(mixed $input, string $constraint): bool
+    private function applyNotConstraint(mixed $input, Constraints $constraint): bool
     {
-        if (! in_array($constraint, ALLOWED_CONSTRAINTS)) {
-            throw new Exception("{$constraint} is invalid constraint type. Only allowed constraints are: ". $this->getImplodeConstraints());
-        }
-
-        return match($constraint) {
-            'alpha' => !ctype_alpha($input),
-            'numeric' => !ctype_digit($input),
-            'alpha_numeric' => !ctype_alnum($input),
-            'array' => !is_array($input),
-            'uppercase' => !ctype_upper($input),
-            'lowercase' => !ctype_lower($input),
-            'symbol' => !ctype_space($input),
-            default => true,
-        };
+       return ! $this->applyMustConstraint($input,$constraint);
     }
 
 }

@@ -16,5 +16,7 @@
             "email": "xyluz@ymail.com"
         }
     ],
-    "require": {}
+    "require": {
+      "ext-ctype": "*"
+    }
 }

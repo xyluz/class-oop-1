@@ -5,13 +5,13 @@ namespace App\SharedClasses\Objects;
 class UserRequestObject
 {
     public function __construct(
-        public string $username,
-        public string $password,
-        public string $confirm_password,
-        public string $firstname,
-        public string $lastname,
-        public string $phone_number,
-        public string $dob,
+        public ?string $username= null,
+        public ?string $password= null,
+        public ?string $firstname= null,
+        public ?string $lastname= null,
+        public ?string $phone_number= null,
+        public ?string $dob = null,
+        public ?string $confirm_password = null,
     )
     {
     }

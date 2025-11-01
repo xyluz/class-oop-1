@@ -2,21 +2,23 @@
 
 use App\SharedClasses\Enums\Constraints;
 use App\SharedClasses\Enums\Rules;
-use App\SharedClasses\Objects\RulesObject;
+use App\SharedClasses\Objects\RuleObject;
+use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;
 use Exception;
+use http\Exception\InvalidArgumentException;
 
 
 class Validator
 {
-    //TODO: Make class for input Object
-    //TODO: make class for rules (in addition to Enum)
     //TODO: create class for handling errors
 
     private array $errors = [];
-    public function __construct(public RulesObject $rules, public UserRequestObject $inputObject)
+    public function __construct(
+        public RulesCollection        $rulesCollection,
+        public UserRequestObject $inputObject
+    )
     {
-        //TODO: implement data cleanup
     }
 
     /**
@@ -24,87 +26,87 @@ class Validator
      */
     public function validateCustom(): array {
 
-        //TODO: Fix the rules to array and use the correct rule format
+        foreach ($this->rulesCollection->rules as $field => $rule) {
 
-        foreach ($this->rules->toArray() as $column => $rule) {
-            if (!isset($this->inputObject->{$column})) {
+            if (!isset($this->inputObject->{$field})) {
                 continue;
             }
 
-            $isError = $this->applySingleInputValidation($rule, $this->inputObject->{$column});
+            $isError = $this->applyValidationRuleToField($rule, $this->inputObject->{$field});
 
-            $this->errors[$column] = count($isError) > 0 ? $isError : null;
+            $this->errors[$field] = count($isError) > 0 ? $isError : null;
 
         }
 
         return array_filter($this->errors);
     }
 
-    private function makeArrayFromString(string $separator, string $string):array{
-        return explode($separator, $string);
-    }
     /**
      * @throws Exception
      */
-    private function applySingleInputValidation(mixed $rule, mixed $input): array
+    private function applyValidationRuleToField(string $rules, string|int $input): array
     {
-//        Rules::MUST
-// { name: MUST, value: 'must'}
 
+        $splitRules = explode('|',$rules);
 
-        $splitRules = $this->makeArrayFromString('|',$rule);
         $singleInputError = [];
 
         foreach ($splitRules as $rule) {
+
             $single = explode(':', $rule);
             $law = $single[0];
+
             $value = $single[1];
 
-            if (! $law instanceof Rules) {
-                throw new Exception($rule . 'is invalid' . ' Only allowed rules are: ' . Rules::toString());
-            }
-
             $check = match($law) {
-                Rules::MIN() => $this->applyMinCheck($input, $value) ? true : "{$input} must be at least {$value} characters",
-                Rules::MAX() => $this->applyMaxCheck($input, $value) ? true : "{$input} must not exceed  {$value} characters",
+                Rules::MIN() => $this->applyMinCheck($input, $value) ? "{$input} must be at least {$value} characters" : true ,
+                Rules::MAX() => $this->applyMaxCheck($input, $value) ? "{$input} must not exceed  {$value} characters" : true ,
                 Rules::MUST() => $this->applyMustConstraint($input, $value) ? true : "{$input} must be of type {$value}",
                 Rules::NOT() => $this->applyNotConstraint($input, $value) ? true : "{$input} must not be of type {$value}",
                 default => throw new Exception("{$rule} is invalid rule"),
             };
-            if (! $check ) {
-                $singleInputError["$law:$value"] = $check;
+
+            if ( is_string( $check ) ) {
+                $key = $law . ':' . $value;
+                $singleInputError[$key] = $check;
             }
         }
+
         return $singleInputError;
 
     }
 
-    private function applyMaxCheck(mixed $input, string $value): bool
+    private function applyMaxCheck(string $input, int $value): bool
     {
-        return is_int($input) ?  $input <= $value : strlen($input) <= $value;
+        return strlen($input) >= $value;
     }
 
-    private function applyMinCheck(mixed $input, string $value): bool
+    private function applyMinCheck(string $input, int $value): bool
     {
-        return is_int($input) ?  $input >= $value : strlen($input) >= $value;
+        return  strlen($input) < $value;
     }
 
-    private function applyMustConstraint(mixed $input, Constraints $constraint): bool
+    //TODO: Move to use regex for better validation
+    private function applyMustConstraint(string $input, string $value): bool
     {
-        return match($constraint) {
-            Constraints::ALPHA => ctype_alpha($input),
-            Constraints::NUMERIC => ctype_digit($input),
-            Constraints::ALPHA_NUMERIC => ctype_alnum($input),
-            Constraints::ARRAY => is_array($input),
-            Constraints::LOWERCASE => ctype_lower($input),
-            Constraints::SYMBOL => ctype_space($input),
+        return match($value) {
+            Constraints::ALPHA() => ctype_alpha($input),
+            Constraints::NUMERIC() => ctype_digit($input),
+            Constraints::ALPHA_NUMERIC() => ctype_alnum($input),
+            Constraints::ARRAY() => is_array($input),
+            Constraints::LOWERCASE() => ctype_lower($input),
+            Constraints::SYMBOL() => $this->checkHasSymbol($input),
             default => false,
         };
     }
 
-    private function applyNotConstraint(mixed $input, Constraints $constraint): bool
+    private function applyNotConstraint(mixed $input, string $constraint): bool
     {
        return ! $this->applyMustConstraint($input,$constraint);
+    }
+
+    private function checkHasSymbol($passwordToArray): bool{
+        return  preg_match('[^.a-zA-Z0-9$]',  $passwordToArray);
     }
 
 }

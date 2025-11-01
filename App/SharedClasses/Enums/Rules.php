@@ -22,5 +22,6 @@ enum Rules: string
     case MAX = 'max';
     case MUST = 'must';
     case NOT = 'not';
+    case SHOULD = 'should';
 
 }

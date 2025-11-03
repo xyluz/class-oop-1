@@ -15,9 +15,6 @@ $userObject =  UserRequestObject::fromArray([
     'phone_number' => '0846587392'
 ]);
 
-$test = $userObject->empty() ? 'Empty' : 'Not empty';
-
-//use empty like so: dd($test)
 
 $rules = [
     'firstname'=>'min:3|max:200|must:alpha|not:numeric',
@@ -32,7 +29,11 @@ $validator = new Validator(
     inputObject: $userObject
 );
 
-dd($validator->validateCustom());
+try {
+    dd($validator->run());
+} catch (Exception $e) {
+    dd($e->getMessage());
+}
 
 
 //TODO: Date validation:

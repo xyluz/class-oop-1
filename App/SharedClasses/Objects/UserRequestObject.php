@@ -17,7 +17,6 @@ class UserRequestObject
     }
 
     /**
-     * TODO: address issues with testing static methods - this is a placeholder method.
      *
      * @param array $array
      * @return static
@@ -27,9 +26,8 @@ class UserRequestObject
         return new self(...$array);
     }
 
-    public static function empty():bool{
-        return false; //TODO: implement this or call it count
+    public function empty():bool{
+        return empty($this->username) && empty($this->lastname) && empty($this->firstname);
     }
-
 
 }

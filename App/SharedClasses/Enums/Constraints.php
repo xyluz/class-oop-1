@@ -17,6 +17,6 @@ enum Constraints:string
     case ARRAY = 'array';
     case UPPERCASE = 'uppercase';
     case LOWERCASE = 'lowercase';
-    case SYMBOL = 'symbol';
+    case SPECIAL_CHARACTER = 'special_character';
 
 }

@@ -12,6 +12,7 @@ use App\SharedClasses\Traits\SharedEnumMethods;
  * @method static MAX():string //max
  * @method static MUST():string
  * @method static NOT():string
+ * @method static SHOULD():string
  */
 enum Rules: string
 {

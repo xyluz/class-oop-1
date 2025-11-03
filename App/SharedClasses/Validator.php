@@ -2,11 +2,9 @@
 
 use App\SharedClasses\Enums\Constraints;
 use App\SharedClasses\Enums\Rules;
-use App\SharedClasses\Objects\RuleObject;
 use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;
 use Exception;
-use http\Exception\InvalidArgumentException;
 
 
 class Validator
@@ -42,6 +40,11 @@ class Validator
     }
 
     /**
+     * Extracts the rules using the | and constraint using the :
+     * example of request:
+     *
+     * 'firstname'=>'min:3|max:200|must:alpha|not:numeric',
+     *
      * @throws Exception
      */
     private function applyValidationRuleToField(string $rules, string|int $input): array
@@ -62,7 +65,8 @@ class Validator
                 Rules::MIN() => $this->applyMinCheck($input, $value) ? "{$input} must be at least {$value} characters" : true ,
                 Rules::MAX() => $this->applyMaxCheck($input, $value) ? "{$input} must not exceed  {$value} characters" : true ,
                 Rules::MUST() => $this->applyMustConstraint($input, $value) ? true : "{$input} must be of type {$value}",
-                Rules::NOT() => $this->applyNotConstraint($input, $value) ? true : "{$input} must not be of type {$value}",
+                Rules::NOT() => $this->applyNotConstraint($input, $value) ? "{$input} must not be of type {$value}" : true,
+                Rules::SHOULD() => $this->applyShouldConstraint($input, $value) ? true : "{$input} should have type {$value}",
                 default => throw new Exception("{$rule} is invalid rule"),
             };
 
@@ -86,7 +90,6 @@ class Validator
         return  strlen($input) < $value;
     }
 
-    //TODO: Move to use regex for better validation
     private function applyMustConstraint(string $input, string $value): bool
     {
         return match($value) {
@@ -95,7 +98,8 @@ class Validator
             Constraints::ALPHA_NUMERIC() => ctype_alnum($input),
             Constraints::ARRAY() => is_array($input),
             Constraints::LOWERCASE() => ctype_lower($input),
-            Constraints::SYMBOL() => $this->checkHasSymbol($input),
+            Constraints::UPPERCASE() => ctype_upper($input),
+            Constraints::SYMBOL() => ! ctype_alnum($input),
             default => false,
         };
     }
@@ -105,8 +109,40 @@ class Validator
        return ! $this->applyMustConstraint($input,$constraint);
     }
 
-    private function checkHasSymbol($passwordToArray): bool{
-        return  preg_match('[^.a-zA-Z0-9$]',  $passwordToArray);
+    private function checkHasSpecialCharacter($passwordToArray): bool{
+         return preg_match('/[^a-zA-Z0-9\s]/',  $passwordToArray);
+    }
+
+    private function applyShouldConstraint(int|string $input, string $value): bool|int
+    {
+        return match($value) {
+            Constraints::ALPHA() => $this->shouldHaveAlpha($input),
+            Constraints::NUMERIC() => $this->shouldHaveNumeric($input),
+            Constraints::LOWERCASE() => $this->shouldHaveLowercase($input),
+            Constraints::UPPERCASE() => $this->shouldHaveUppercase($input),
+            Constraints::SPECIAL_CHARACTER() => $this->checkHasSpecialCharacter($input),
+            default => false,
+        };
+    }
+
+    private function shouldHaveAlpha($input): false|int
+    {
+        return  preg_match('/[a-zA-Z]/',  $input);
+    }
+
+    private function shouldHaveNumeric($input): false|int
+    {
+        return  preg_match('/\d/',  $input);
+    }
+
+    private function shouldHaveLowercase(int|string $input):bool
+    {
+        return  preg_match('/[a-z]/',  $input);
+    }
+
+    private function shouldHaveUppercase(int|string $input):bool
+    {
+        return  preg_match('/[A-Z]/',  $input);
     }
 
 }

@@ -7,7 +7,7 @@
             "App\\": "App/"
         },
         "files": [
-            "helpers/functions.php"
+          "App/SharedClasses/Support/functions.php"
         ]
     },
     "authors": [

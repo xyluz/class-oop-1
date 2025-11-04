@@ -28,7 +28,7 @@ $rules = [
 ];
 
 $validator = new Validator(
-    rulesCollection: new RulesCollection($rules),
+    $rules,  //TODO: remove Rules Collection
     inputObject: $userObject
 );
 

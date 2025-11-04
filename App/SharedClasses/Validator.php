@@ -2,8 +2,8 @@
 
 use App\SharedClasses\Enums\Constraints;
 use App\SharedClasses\Enums\Rules;
-use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;
+use App\SharedClasses\Support\PasswordHelper;
 use Exception;
 
 
@@ -13,7 +13,7 @@ class Validator
 
     private array $errors = [];
     public function __construct(
-        public RulesCollection        $rulesCollection,
+        public array $rules,
         public UserRequestObject $inputObject
     )
     {
@@ -24,13 +24,13 @@ class Validator
      */
     public function validateCustom(): array {
 
-        foreach ($this->rulesCollection->rules as $field => $rule) {
+        foreach ($this->rules as $field => $ruleString) {
 
             if (!isset($this->inputObject->{$field})) {
                 continue;
             }
 
-            $isError = $this->applyValidationRuleToField($rule, $this->inputObject->{$field});
+            $isError = $this->applyValidationRuleToField($field, $ruleString, $this->inputObject->{$field});
 
             $this->errors[$field] = count($isError) > 0 ? $isError : null;
 
@@ -47,26 +47,26 @@ class Validator
      *
      * @throws Exception
      */
-    private function applyValidationRuleToField(string $rules, string|int $input): array
+    private function applyValidationRuleToField(string $field, string $ruleString, string|int $input): array
     {
 
-        $splitRules = explode('|',$rules);
+        $splitRuleString = explode('|',$ruleString);
 
         $singleInputError = [];
 
-        foreach ($splitRules as $rule) {
+        foreach ($splitRuleString as $rule) {
 
-            $single = explode(':', $rule);
-            $law = $single[0];
-
-            $value = $single[1];
+            [$law, $value] = explode(':', $rule);
+//            $law = $single[0];
+//
+//            $value = $single[1];
 
             $check = match($law) {
-                Rules::MIN() => $this->applyMinCheck($input, $value) ? "{$input} must be at least {$value} characters" : true ,
-                Rules::MAX() => $this->applyMaxCheck($input, $value) ? "{$input} must not exceed  {$value} characters" : true ,
-                Rules::MUST() => $this->applyMustConstraint($input, $value) ? true : "{$input} must be of type {$value}",
-                Rules::NOT() => $this->applyNotConstraint($input, $value) ? "{$input} must not be of type {$value}" : true,
-                Rules::SHOULD() => $this->applyShouldConstraint($input, $value) ? true : "{$input} should have type {$value}",
+                Rules::MIN() => $this->applyMinCheck($input, $value) ? "{$field}: '{$input}' must be at least {$value} characters" : true ,
+                Rules::MAX() => $this->applyMaxCheck($input, $value) ? "{$field}: '{$input}' must not exceed  {$value} characters" : true ,
+                Rules::MUST() => $this->applyMustConstraint($input, $value) ? true : "{$field}: '{$input}' must be of type {$value}",
+                Rules::NOT() => $this->applyNotConstraint($input, $value) ? "{$field}: '{$input}' must not be of type {$value}" : true,
+                Rules::SHOULD() => $this->applyShouldConstraint($input, $value) ? true : "{$field}: '{$input}' should have type {$value}",
                 default => throw new Exception("{$rule} is invalid rule"),
             };
 
@@ -109,40 +109,16 @@ class Validator
        return ! $this->applyMustConstraint($input,$constraint);
     }
 
-    private function checkHasSpecialCharacter($passwordToArray): bool{
-         return preg_match('/[^a-zA-Z0-9\s]/',  $passwordToArray);
-    }
-
     private function applyShouldConstraint(int|string $input, string $value): bool|int
     {
         return match($value) {
-            Constraints::ALPHA() => $this->shouldHaveAlpha($input),
-            Constraints::NUMERIC() => $this->shouldHaveNumeric($input),
-            Constraints::LOWERCASE() => $this->shouldHaveLowercase($input),
-            Constraints::UPPERCASE() => $this->shouldHaveUppercase($input),
-            Constraints::SPECIAL_CHARACTER() => $this->checkHasSpecialCharacter($input),
+            Constraints::ALPHA() => PasswordHelper::shouldHaveAlpha($input),
+            Constraints::NUMERIC() => PasswordHelper::shouldHaveNumeric($input),
+            Constraints::LOWERCASE() => PasswordHelper::shouldHaveLowercase($input),
+            Constraints::UPPERCASE() => PasswordHelper::shouldHaveUppercase($input),
+            Constraints::SPECIAL_CHARACTER() => PasswordHelper::checkHasSpecialCharacter($input),
             default => false,
         };
-    }
-
-    private function shouldHaveAlpha($input): false|int
-    {
-        return  preg_match('/[a-zA-Z]/',  $input);
-    }
-
-    private function shouldHaveNumeric($input): false|int
-    {
-        return  preg_match('/\d/',  $input);
-    }
-
-    private function shouldHaveLowercase(int|string $input):bool
-    {
-        return  preg_match('/[a-z]/',  $input);
-    }
-
-    private function shouldHaveUppercase(int|string $input):bool
-    {
-        return  preg_match('/[A-Z]/',  $input);
     }
 
 }

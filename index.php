@@ -1,5 +1,9 @@
 <?php
 
+if(!defined('ROOT_DIR')) define('ROOT_DIR', realpath(__DIR__));
+
+include_once("routes/slash.route.php");
+
 use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;
 use App\SharedClasses\Validator;
@@ -46,3 +50,14 @@ try {
 
 //TODO: Tuesday / Wednesday - Routing
 //TODO: Concept of middleware
+
+
+//-> type an address: google.com
+//-> DNS Server -> google -> 142.251.30.138
+//-> 142.251.30.138 -> GET /?search="value"
+//(middleware)
+//    -> to journey: when the request comes from user to the server
+//    ->from journey: when the server sends request back to the user
+//-> 142.251.30.138 -> / -> homepage.php
+//-> homepage.php $search=value => DB: find records that match the value -> send that back to the server.
+//-> 200/201 (Read about response codes) -> $data -> $data

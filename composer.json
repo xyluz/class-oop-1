@@ -17,6 +17,7 @@
         }
     ],
     "require": {
-      "ext-ctype": "*"
+      "ext-ctype": "*",
+      "ext-http": "*"
     }
 }

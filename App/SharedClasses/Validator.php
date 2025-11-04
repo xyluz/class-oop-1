@@ -3,10 +3,9 @@
 use App\SharedClasses\Enums\Constraints;
 use App\SharedClasses\Enums\Rules;
 use App\SharedClasses\Objects\RulesCollection;
-use App\SharedClasses\Objects\UserRequestObject;
-use Cassandra\Exception\UnpreparedException;
+use App\SharedClasses\Objects\UserRequestObject;;
 use Exception;
-use http\Exception\InvalidArgumentException;
+//use http\Exception\InvalidArgumentException;
 
 
 class Validator
@@ -27,7 +26,8 @@ class Validator
     public function run(): array {
 
         if($this->inputObject->empty()){
-            throw new InvalidArgumentException('Input cannot be empty');
+            dd('Input cannot be empty');
+//            throw new InvalidArgumentException('Input cannot be empty');
         }
 
         foreach ($this->rulesCollection->rules as $field => $rule) {

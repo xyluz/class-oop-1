@@ -2,17 +2,16 @@
 
 use App\SharedClasses\Enums\Constraints;
 use App\SharedClasses\Enums\Rules;
+use App\SharedClasses\Enums\StatusCode;
+use App\SharedClasses\Objects\ResultObject;
 use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;;
 use Exception;
-//use http\Exception\InvalidArgumentException;
 
 
 class Validator
 {
-    //TODO: create class for handling errors
-
-    private array $errors = [];
+    private array $errors;
     public function __construct(
         public RulesCollection        $rulesCollection,
         public UserRequestObject $inputObject
@@ -24,11 +23,6 @@ class Validator
      * @throws Exception
      */
     public function run(): array {
-
-        if($this->inputObject->empty()){
-            dd('Input cannot be empty');
-//            throw new InvalidArgumentException('Input cannot be empty');
-        }
 
         foreach ($this->rulesCollection->rules as $field => $rule) {
 
@@ -68,17 +62,17 @@ class Validator
             $value = $single[1];
 
             $check = match($law) {
-                Rules::MIN() => $this->applyMinCheck($input, $value) ? "{$input} must be at least {$value} characters" : true ,
-                Rules::MAX() => $this->applyMaxCheck($input, $value) ? "{$input} must not exceed  {$value} characters" : true ,
-                Rules::MUST() => $this->applyMustConstraint($input, $value) ? true : "{$input} must be of type {$value}",
-                Rules::NOT() => $this->applyNotConstraint($input, $value) ? "{$input} must not be of type {$value}" : true,
-                Rules::SHOULD() => $this->applyShouldConstraint($input, $value) ? true : "{$input} should have type {$value}",
+                Rules::MIN() => $this->applyMinCheck($input, $value),
+                Rules::MAX() => $this->applyMaxCheck($input, $value),
+                Rules::MUST() => $this->applyMustConstraint($input, $value),
+                Rules::NOT() => $this->applyNotConstraint($input, $value),
+                Rules::SHOULD() => $this->applyShouldConstraint($input, $value),
                 default => throw new Exception("{$rule} is invalid rule"),
             };
 
-            if ( is_string( $check ) ) {
+            if ( $check->isFailure() ) {
                 $key = $law . ':' . $value;
-                $singleInputError[$key] = $check;
+                $singleInputError[$key] = $check->getSummary();
             }
         }
 
@@ -86,49 +80,57 @@ class Validator
 
     }
 
-    private function applyMaxCheck(string $input, int $value): bool
+    private function applyMaxCheck(string $input, int $value): ResultObject
     {
-        return strlen($input) >= $value;
+
+         if(strlen($input) >= $value){
+             return new ResultObject(message: '', statusCode: StatusCode::SUCCESS);
+         }
+
+        return new ResultObject(message: "{$input} must not exceed  {$value} characters", statusCode: StatusCode::VALIDATION_ERROR);
     }
 
-    private function applyMinCheck(string $input, int $value): bool
+    private function applyMinCheck(string $input, int $value): ResultObject
     {
-        return  strlen($input) < $value;
+
+        if(strlen($input) < $value){
+            return new ResultObject(message: '', statusCode: StatusCode::SUCCESS);
+        }
+
+        return new ResultObject(message: "{$input} must be at least {$value} characters", statusCode: StatusCode::VALIDATION_ERROR);
     }
 
-    private function applyMustConstraint(string $input, string $value): bool
+    private function applyMustConstraint(string $input, string $value): ResultObject
     {
-        return match($value) {
-            Constraints::ALPHA() => ctype_alpha($input),
-            Constraints::NUMERIC() => ctype_digit($input),
-            Constraints::ALPHA_NUMERIC() => ctype_alnum($input),
-            Constraints::ARRAY() => is_array($input),
-            Constraints::LOWERCASE() => ctype_lower($input),
-            Constraints::UPPERCASE() => ctype_upper($input),
-            Constraints::SYMBOL() => ! ctype_alnum($input),
-            default => false,
-        };
+        if($this->doMustConstraintCheck($value, $input)){
+            return new ResultObject(message: 'pass', statusCode: StatusCode::SUCCESS);
+        }
+
+        return new ResultObject(message: "{$input} must be of type {$value}", statusCode: StatusCode::VALIDATION_ERROR);
     }
 
-    private function applyNotConstraint(mixed $input, string $constraint): bool
+    private function applyNotConstraint(mixed $input, string $constraint): ResultObject
     {
-       return ! $this->applyMustConstraint($input,$constraint);
+        if(! $this->doMustConstraintCheck($constraint, $input)){
+            return new ResultObject(message: 'pass', statusCode: StatusCode::SUCCESS);
+        }
+
+        return new ResultObject(message: "{$input} must not be of type {$constraint}", statusCode: StatusCode::VALIDATION_ERROR);
+
     }
 
     private function checkHasSpecialCharacter($passwordToArray): bool{
          return preg_match('/[^a-zA-Z0-9\s]/',  $passwordToArray);
     }
 
-    private function applyShouldConstraint(int|string $input, string $value): bool|int
+    private function applyShouldConstraint(int|string $input, string $value): ResultObject
     {
-        return match($value) {
-            Constraints::ALPHA() => $this->shouldHaveAlpha($input),
-            Constraints::NUMERIC() => $this->shouldHaveNumeric($input),
-            Constraints::LOWERCASE() => $this->shouldHaveLowercase($input),
-            Constraints::UPPERCASE() => $this->shouldHaveUppercase($input),
-            Constraints::SPECIAL_CHARACTER() => $this->checkHasSpecialCharacter($input),
-            default => false,
-        };
+        if($this->doShouldConstraintCheck($value, $input)){
+            return new ResultObject(message: 'pass', statusCode: StatusCode::SUCCESS);
+        }
+
+        return new ResultObject(message: "{$input} should have type {$value}", statusCode: StatusCode::VALIDATION_ERROR);
+
     }
 
     private function shouldHaveAlpha($input): false|int
@@ -149,6 +151,42 @@ class Validator
     private function shouldHaveUppercase(int|string $input):bool
     {
         return  preg_match('/[A-Z]/',  $input);
+    }
+
+    /**
+     * @param string $value
+     * @param string $input
+     * @return bool
+     */
+    public function doMustConstraintCheck(string $value, string $input): bool
+    {
+        return match ($value) {
+            Constraints::ALPHA() => ctype_alpha($input),
+            Constraints::NUMERIC() => ctype_digit($input),
+            Constraints::ALPHA_NUMERIC() => ctype_alnum($input),
+            Constraints::ARRAY() => is_array($input),
+            Constraints::LOWERCASE() => ctype_lower($input),
+            Constraints::UPPERCASE() => ctype_upper($input),
+            Constraints::SYMBOL() => !ctype_alnum($input),
+            default => false,
+        };
+    }
+
+    /**
+     * @param string $value
+     * @param int|string $input
+     * @return bool|int
+     */
+    public function doShouldConstraintCheck(string $value, int|string $input): int|bool
+    {
+        return match ($value) {
+            Constraints::ALPHA() => $this->shouldHaveAlpha($input),
+            Constraints::NUMERIC() => $this->shouldHaveNumeric($input),
+            Constraints::LOWERCASE() => $this->shouldHaveLowercase($input),
+            Constraints::UPPERCASE() => $this->shouldHaveUppercase($input),
+            Constraints::SPECIAL_CHARACTER() => $this->checkHasSpecialCharacter($input),
+            default => false,
+        };
     }
 
 }

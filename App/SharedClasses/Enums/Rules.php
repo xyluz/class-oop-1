@@ -5,8 +5,6 @@ namespace App\SharedClasses\Enums;
 use App\SharedClasses\Traits\CallStaticTrait;
 use App\SharedClasses\Traits\SharedEnumMethods;
 
-
-
 /**
  * @method static MIN():string //min
  * @method static MAX():string //max

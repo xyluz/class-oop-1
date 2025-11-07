@@ -36,7 +36,8 @@ class ResultObject
         return $this->statusCode->value;
     }
 
-    public function getSummary(){
+    public function getSummary(): string
+    {
         return "message: " . $this->getMessage() . " status: " . $this->getStatusCode();
     }
 }

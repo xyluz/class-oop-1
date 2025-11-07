@@ -1,11 +1,11 @@
 - Authentication and
-    - login
+    - login 
     - register
     - password reset
     - change password
     - emails
     - dashboard
-    - database
+    - database (DB)
 - simple ecommerce functionalities
     - Products
     - CRUD

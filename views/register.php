@@ -1,14 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Register </title>
-</head>
-<body>
-<p>
-    <a href="/">Home</a> | <a href="/login">Login</a> | <a href="/register">Register</a>
-</p>
+<?php include_once 'layouts/header.layout.php'?>
 
-Welcome to register page
-</body>
-</html>
+    <form action="/register" method="post">
+        <div>
+            <label for="firstname">First Name</label>
+            <input type="text" id="firstname" name="firstname">
+        </div>
+
+        <div>
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastname" name="lastname">
+        </div>
+
+        <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email">
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+        </div>
+
+        <div>
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password">
+        </div>
+
+        <div>
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone_number">
+        </div>
+
+        <button type="submit">Register Now</button>
+    </form>
+
+<?php include_once 'layouts/footer.layout.php'?>

@@ -8,10 +8,15 @@ use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;;
 use Exception;
 
+//TODO: a way to validate checkboxes, true or false.
+//TODO: Confirm password validation
 
 class Validator
 {
-    private array $errors;
+    /**
+     * @var array<ResultObject>
+     */
+    public array $errors;
     public function __construct(
         public RulesCollection        $rulesCollection,
         public UserRequestObject $inputObject
@@ -36,7 +41,7 @@ class Validator
 
         }
 
-        return array_filter($this->errors);
+        return $this->cleanError();
     }
 
     /**
@@ -83,21 +88,22 @@ class Validator
     private function applyMaxCheck(string $input, int $value): ResultObject
     {
 
-         if(strlen($input) >= $value){
-             return new ResultObject(message: '', statusCode: StatusCode::SUCCESS);
+         if(strlen($input) > $value){
+             return new ResultObject(message: "{$input} must not exceed  {$value} characters", statusCode: StatusCode::VALIDATION_ERROR);
          }
 
-        return new ResultObject(message: "{$input} must not exceed  {$value} characters", statusCode: StatusCode::VALIDATION_ERROR);
+         return new ResultObject(message: '', statusCode: StatusCode::SUCCESS);
     }
 
     private function applyMinCheck(string $input, int $value): ResultObject
     {
 
         if(strlen($input) < $value){
-            return new ResultObject(message: '', statusCode: StatusCode::SUCCESS);
+            return new ResultObject(message: "{$input} must be at least {$value} characters", statusCode: StatusCode::VALIDATION_ERROR);
         }
 
-        return new ResultObject(message: "{$input} must be at least {$value} characters", statusCode: StatusCode::VALIDATION_ERROR);
+        return new ResultObject(message: '', statusCode: StatusCode::SUCCESS);
+
     }
 
     private function applyMustConstraint(string $input, string $value): ResultObject
@@ -187,6 +193,19 @@ class Validator
             Constraints::SPECIAL_CHARACTER() => $this->checkHasSpecialCharacter($input),
             default => false,
         };
+    }
+
+    public function hasErrors():bool{
+        return count($this->cleanError()) > 0;
+    }
+
+    public function getErrors():array{
+        return $this->cleanError();
+    }
+
+    public function cleanError(): array
+    {
+        return array_filter($this->errors);
     }
 
 }

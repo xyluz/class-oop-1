@@ -1,22 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login page</title>
-</head>
-<body>
+<?php include_once 'layouts/header.layout.php'?>
 
-<p>
-    <a href="/">Home</a> | <a href="/login">Login</a> | <a href="/register">Register</a>
-</p>
 
-Please login:
 
-<form action="/login" method="get">
-    <label>
-        <input type="text" name="username" />
-    </label>
+<form action="/login" method="post">
+    <div>
+        <label for="email">email</label>
+        <input type="text" id="email" name="email">
+    </div>
+
+    <div>
+        <label for="password">Password</label>
+        <input type="text" id="password" name="password">
+    </div>
+
     <button type="submit">Login</button>
 </form>
-</body>
-</html>
+
+<?php include_once 'layouts/footer.layout.php'?>

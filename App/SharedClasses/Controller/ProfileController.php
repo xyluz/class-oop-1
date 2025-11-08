@@ -3,12 +3,12 @@
 namespace App\SharedClasses\Controller;
 
 use App\SharedClasses\Enums\StatusCode;
-use App\SharedClasses\Objects\Requests\RegisterRequest;
+use App\SharedClasses\Objects\Requests\ProfileRequest;
 use App\SharedClasses\Objects\Response;
 
-class RegisterController extends BaseController
+class ProfileController extends BaseController
 {
-    public function __construct(RegisterRequest $request)
+    public function __construct(ProfileRequest $request)
     {
         parent::__construct($request);
     }
@@ -25,6 +25,12 @@ class RegisterController extends BaseController
             ))->dd();
         }
 
-        redirect('/dashboard'); //TODO: Display user details on the dashboard
+        (new Response(
+            status: StatusCode::SUCCESS,
+            statusCode: StatusCode::SUCCESS(),
+            message: 'Profile updated',
+            headers: [],
+            body: $this->request->body()
+        ))->dd();
     }
 }

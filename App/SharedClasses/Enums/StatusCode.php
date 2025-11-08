@@ -2,8 +2,14 @@
 
 namespace App\SharedClasses\Enums;
 
+use App\SharedClasses\Traits\CallStaticTrait;
+
+/**
+ * @method VALIDATION_ERROR():int
+ */
 enum StatusCode:int
 {
+    use CallStaticTrait;
     case SUCCESS = 200;
     case NOT_FOUND = 404;
     case SEVER_ERROR = 500;

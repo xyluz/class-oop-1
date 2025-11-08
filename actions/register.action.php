@@ -8,6 +8,7 @@ $rules = [
     'firstname'=>'min:3|max:200|must:alpha|not:numeric',
     'lastname'=>'min:3|max:200|must:alpha|not:numeric',
     'username'=>'min:3|max:5|must:alpha',
+    'email'=>'min:3|max:5|must:alpha|must:symbol',
     'phone'=>'min:11|max:15|must:numeric',
     'password'=> "min:5|max:50|should:alpha|should:uppercase",
 //    'password'=> "min:8|max:50|should:alpha|should:uppercase|should:lowercase|should:numeric|should:special_character",

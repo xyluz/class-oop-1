@@ -3,12 +3,12 @@
 namespace App\SharedClasses\Controller;
 
 use App\SharedClasses\Enums\StatusCode;
-use App\SharedClasses\Objects\Requests\RegisterRequest;
+use App\SharedClasses\Objects\Requests\LoginRequest;
 use App\SharedClasses\Objects\Response;
 
-class RegisterController extends BaseController
+class LoginController extends BaseController
 {
-    public function __construct(RegisterRequest $request)
+    public function __construct(LoginRequest $request)
     {
         parent::__construct($request);
     }
@@ -25,6 +25,6 @@ class RegisterController extends BaseController
             ))->dd();
         }
 
-        redirect('/dashboard'); //TODO: Display user details on the dashboard
+        redirect('/dashboard');
     }
 }

@@ -27,8 +27,8 @@
         </div>
 
         <div>
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone" name="phone_number">
+            <label for="phone_number">Phone</label>
+            <input type="tel" id="phone_number" name="phone_number">
         </div>
 
         <button type="submit">Register Now</button>

@@ -21,7 +21,6 @@ $request = new $requestObject(
     body: UserRequestObject::fromArray(extractRequestBody($requestMethod))
 );
 
-
 $controller = (new $makeControllerName($request))->{$method}();
 
 //TODO: helper functions

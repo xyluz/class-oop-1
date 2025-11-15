@@ -33,11 +33,9 @@ class Validator
         foreach ($this->rulesCollection->rules as $field => $rule) {
 
             if (!isset($this->inputObject->{$field})) {
-                echo 'here';
                 continue;
             }
 
-            echo 'here2';
             $isError = $this->applyValidationRuleToField($rule, $this->inputObject->{$field});
 
             $this->errors[$field] = count($isError) > 0 ? $isError : null;

@@ -11,7 +11,7 @@ $makeControllerName = "App\SharedClasses\Controller\\". ucwords($endpoint) . 'Co
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-$method = 'index';
+$method = 'index'; //TODO: get the correct method to call
 
 $requestObject = "App\SharedClasses\Objects\Requests\\". ucwords($endpoint) . 'Request';
 
@@ -22,6 +22,7 @@ $request = new $requestObject(
 );
 
 $controller = (new $makeControllerName($request))->{$method}();
+
 
 //TODO: helper functions
 function extractRequestBody($request_method):array{

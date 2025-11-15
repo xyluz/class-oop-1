@@ -28,6 +28,7 @@ get('/dashboard','views/dashboard.php');
  */
 
 post('/register','middlewares/request.middleware.php');
+post('/login','middlewares/request.middleware.php');
 
 /**
  * Error Pages

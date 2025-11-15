@@ -6,6 +6,8 @@ use App\SharedClasses\Enums\StatusCode;
 use App\SharedClasses\Objects\ResultObject;
 use App\SharedClasses\Objects\RulesCollection;
 use App\SharedClasses\Objects\UserRequestObject;;
+
+use App\SharedClasses\Support\PasswordHelper;
 use Exception;
 
 //TODO: a way to validate checkboxes, true or false.
@@ -185,12 +187,12 @@ class Validator
      */
     public function doShouldConstraintCheck(string $value, int|string $input): int|bool
     {
-        return match ($value) {
-            Constraints::ALPHA() => $this->shouldHaveAlpha($input),
-            Constraints::NUMERIC() => $this->shouldHaveNumeric($input),
-            Constraints::LOWERCASE() => $this->shouldHaveLowercase($input),
-            Constraints::UPPERCASE() => $this->shouldHaveUppercase($input),
-            Constraints::SPECIAL_CHARACTER() => $this->checkHasSpecialCharacter($input),
+        return match($value) {
+            Constraints::ALPHA() => PasswordHelper::shouldHaveAlpha($input),
+            Constraints::NUMERIC() => PasswordHelper::shouldHaveNumeric($input),
+            Constraints::LOWERCASE() => PasswordHelper::shouldHaveLowercase($input),
+            Constraints::UPPERCASE() => PasswordHelper::shouldHaveUppercase($input),
+            Constraints::SPECIAL_CHARACTER() => PasswordHelper::checkHasSpecialCharacter($input),
             default => false,
         };
     }

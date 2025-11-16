@@ -5,7 +5,7 @@ namespace App\SharedClasses\Models;
 use App\SharedClasses\Database;
 use InvalidArgumentException;
 
-class BaseModel extends Database
+abstract class BaseModel extends Database
 {
 
     public array $data;
